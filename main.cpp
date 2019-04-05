@@ -12,7 +12,7 @@ public:
 		m_blur(width, height)
 	{}
 
-	void process(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render) const
+	void process(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render) const override
 	{
 		bloom_texure.display();
 		final_render.draw(sf::Sprite(m_blur.apply(bloom_texure.getTexture(), 4)), sf::BlendAdd);
