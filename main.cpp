@@ -2,20 +2,25 @@
 #include "Renderer.hpp"
 #include "dynamic_blur.hpp"
 
-struct Bloom
+class BloomStage : public RenderStage
 {
-	Bloom(uint32_t width, uint32_t height) :
-		blur(width, height)
+public:
+	BloomStage(ID tex1, ID tex2, uint32_t width, uint32_t height) :
+		RenderStage(tex1, tex2),
+		m_blur(width, height)
 	{}
 
-	void apply(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render)
+	void process(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render) const
 	{
 		bloom_texure.display();
-		final_render.draw(sf::Sprite(blur.apply(bloom_texure.getTexture(), 3)), sf::BlendAdd);
+		final_render.draw(sf::Sprite(m_blur.apply(bloom_texure.getTexture(), 4)), sf::BlendAdd);
 	}
 
-	Blur blur;
+private:
+	mutable Blur m_blur;
 };
+
+using BloomStagePtr = std::shared_ptr<RenderStage>;
 
 int main()
 {
@@ -29,10 +34,8 @@ int main()
 	renderer.setRenderScale(0.5f);
 
 	// Add bloom layer
-	Bloom bloom(win_width, win_height);
 	const ID bloom_texture(renderer.addLayer());
-	RenderStage bloom_stage([&](sf::RenderTexture& t1, sf::RenderTexture& t2) { bloom.apply(t1, t2); }, bloom_texture, Renderer::FinalTexture);
-
+	BloomStagePtr bloom_stage(std::make_shared<BloomStage>(bloom_texture, Renderer::FinalTexture, win_width, win_height));
 	renderer.getPipeline().addStage(bloom_stage);
 
 	// Draw

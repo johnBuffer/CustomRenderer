@@ -3,33 +3,32 @@
 #include <SFML/Graphics.hpp>
 #include <functional>
 #include <vector>
+#include <iostream>
 
-using StageProcess = std::function<void(sf::RenderTexture&, sf::RenderTexture&)>;
 using RenderAccessor = std::function<sf::RenderTexture&(uint32_t id)>;
 
 // A stage in the pipeline
 class RenderStage
 {
 public:
-	RenderStage(StageProcess process, uint32_t id1, uint32_t id2) :
-		m_process(process),
+	RenderStage(uint32_t id1, uint32_t id2) :
 		m_id1(id1),
 		m_id2(id2)
 	{}
 
-	void applyProcess(RenderAccessor accessor) const
+	void exec(RenderAccessor accessor) const
 	{
-		m_process(accessor(m_id1), accessor(m_id2));
+		process(accessor(m_id1), accessor(m_id2));
 	}
 
-	virtual void process(sf::RenderTexture& texture1, sf::RenderTexture& texture2) 
-	{}
+	virtual void process(sf::RenderTexture&, sf::RenderTexture&) const {};
 
 private:
 	uint32_t m_id1;
 	uint32_t m_id2;
-	StageProcess m_process;
 };
+
+using RenderStagePtr = std::shared_ptr<RenderStage>;
 
 // An array on stages that will be applied sequentialy
 class PipeLine
@@ -46,21 +45,21 @@ public:
 		m_accessor = accessor;
 	}
 
-	void addStage(const RenderStage& stage)
+	void addStage(const RenderStagePtr stage)
 	{
 		m_stages.push_back(stage);
 	}
 
 	const sf::Sprite execute()
 	{
-		for (const RenderStage& stage : m_stages)
+		for (const RenderStagePtr stage : m_stages)
 		{
-			stage.process(m_accessor);
+			stage->exec(m_accessor);
 		}
 	}
 
 private:
 	RenderAccessor m_accessor;
-	std::vector<RenderStage> m_stages;
+	std::vector<RenderStagePtr> m_stages;
 };
 
