@@ -24,14 +24,13 @@ using BloomStagePtr = std::shared_ptr<RenderStage>;
 
 int main()
 {
-	constexpr uint32_t win_width(1600);
-	constexpr uint32_t win_height(900);
+	constexpr uint32_t win_width(800);
+	constexpr uint32_t win_height(450);
 
-	sf::RenderWindow window(sf::VideoMode(win_width, win_height), "RenderTest");
+	sf::RenderWindow window(sf::VideoMode(win_width, win_height), "Custom Renderer", sf::Style::Default);
 
 	// Create renderer
 	Renderer renderer(win_width, win_height);
-	renderer.setRenderScale(0.5f);
 
 	// Add bloom layer
 	const ID bloom_texture(renderer.addLayer());
@@ -39,8 +38,10 @@ int main()
 	renderer.getPipeline().addStage(bloom_stage);
 
 	// Draw
-	sf::CircleShape shape(100.f);
+	const float r(100.0f);
+	sf::CircleShape shape(r);
 	shape.setFillColor(sf::Color::Green);
+	shape.setOrigin(r, r);
 
 	while (window.isOpen())
 	{
