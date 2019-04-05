@@ -56,7 +56,7 @@ public:
 		m_layers.emplace_back();
 		m_layers.back().render_texture.create(m_render_size.x, m_render_size.y);
 
-		return m_layers.size() - 1;
+		return ID(m_layers.size() - 1);
 	}
 
 	void clear()

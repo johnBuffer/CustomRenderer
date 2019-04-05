@@ -9,13 +9,13 @@ public:
 
 	BloomStage(ID tex1, ID tex2, uint32_t width, uint32_t height) :
 		RenderStage(tex1, tex2),
-		m_blur(width, height)
+		m_blur(width, height, 0.25f)
 	{}
 
 	void process(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render) const override
 	{
 		bloom_texure.display();
-		final_render.draw(sf::Sprite(m_blur.apply(bloom_texure.getTexture(), 4)), sf::BlendAdd);
+		final_render.draw(m_blur.apply(bloom_texure.getTexture(), 2), sf::BlendAdd);
 	}
 
 	static BloomStagePtr create(ID tex1, ID tex2, uint32_t width, uint32_t height)
@@ -29,13 +29,14 @@ private:
 
 int main()
 {
-	constexpr uint32_t win_width(800);
-	constexpr uint32_t win_height(450);
+	constexpr uint32_t win_width(1600);
+	constexpr uint32_t win_height(900);
 
 	sf::RenderWindow window(sf::VideoMode(win_width, win_height), "Custom Renderer", sf::Style::Default);
 
 	// Create renderer
 	Renderer renderer(win_width, win_height);
+	renderer.setRenderScale(1.0f);
 
 	// Add bloom layer
 	const ID bloom_texture(renderer.addLayer());
