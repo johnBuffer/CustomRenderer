@@ -5,6 +5,8 @@
 class BloomStage : public RenderStage
 {
 public:
+	using BloomStagePtr = std::shared_ptr<RenderStage>;
+
 	BloomStage(ID tex1, ID tex2, uint32_t width, uint32_t height) :
 		RenderStage(tex1, tex2),
 		m_blur(width, height)
@@ -16,11 +18,14 @@ public:
 		final_render.draw(sf::Sprite(m_blur.apply(bloom_texure.getTexture(), 4)), sf::BlendAdd);
 	}
 
+	static BloomStagePtr create(ID tex1, ID tex2, uint32_t width, uint32_t height)
+	{
+		return std::make_shared<BloomStage>(tex1, tex2, width, height);
+	}
+
 private:
 	mutable Blur m_blur;
 };
-
-using BloomStagePtr = std::shared_ptr<RenderStage>;
 
 int main()
 {
@@ -34,8 +39,7 @@ int main()
 
 	// Add bloom layer
 	const ID bloom_texture(renderer.addLayer());
-	BloomStagePtr bloom_stage(std::make_shared<BloomStage>(bloom_texture, Renderer::FinalTexture, win_width, win_height));
-	renderer.getPipeline().addStage(bloom_stage);
+	renderer.getPipeline().addStage(BloomStage::create(bloom_texture, Renderer::FinalTexture, win_width, win_height));
 
 	// Draw
 	const float r(100.0f);
