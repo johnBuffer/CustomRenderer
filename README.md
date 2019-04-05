@@ -77,8 +77,6 @@ private:
 
 ### 2. Add the stage to the renderer pipeline
 ```cpp
-using BloomStagePtr = std::shared_ptr<RenderStage>;
-
 // Create a new layer
 const ID bloom_texture(renderer.addLayer());
 
@@ -88,8 +86,11 @@ renderer.getPipeline().addStage(BloomStage::create(bloom_texture, Renderer::Fina
 
 ### 3. Draw the glowing shape on the appropriate layers
 ```cpp
-renderer.draw(shape, bloom_texture);
+// Draw the shape
 renderer.draw(shape);
+
+// Notify it's glowing by drawing it on the bloom layer
+renderer.draw(shape, bloom_texture);
 ```
 
 ### 4. Display the result
