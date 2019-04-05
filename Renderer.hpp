@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include "RenderPipeline.hpp"
 
 using ID = uint32_t;
 
@@ -27,11 +28,22 @@ public:
 class Renderer
 {
 public:
+	enum
+	{
+		FinalTexture = 0
+	};
+
 	Renderer(uint32_t render_width, uint32_t render_height) :
+		m_pipeline([&](uint32_t id) -> sf::RenderTexture& {return m_layers[id].render_texture; }),
 		m_render_size(render_width, render_height),
 		m_render_scale(1.0f)
 	{
 		addLayer();
+	}
+
+	PipeLine& getPipeline()
+	{
+		return m_pipeline;
 	}
 
 	void setRenderScale(float scale)
@@ -45,6 +57,14 @@ public:
 		m_layers.back().render_texture.create(m_render_size.x, m_render_size.y);
 
 		return m_layers.size() - 1;
+	}
+
+	void clear()
+	{
+		for (RenderLayer& layer : m_layers)
+		{
+			layer.render_texture.clear();
+		}
 	}
 
 	void draw(const sf::Drawable& drawable, ID layer_id = 0)
@@ -62,8 +82,9 @@ public:
 
 	const sf::Sprite render()
 	{
-		m_layers.front().render_texture.display();
+		m_pipeline.execute();
 
+		m_layers.front().render_texture.display();
 		sf::Sprite result(m_layers.front().render_texture.getTexture());
 		result.setScale(1.0f / m_render_scale, 1.0f / m_render_scale);
 
@@ -73,6 +94,8 @@ public:
 private:
 	float m_zoom;
 	sf::Vector2f m_focus;
+
+	PipeLine m_pipeline;
 
 	float m_render_scale;
 	sf::Vector2u m_render_size;

@@ -17,20 +17,13 @@ public:
 		m_id2(id2)
 	{}
 
-	const StageProcess& getProcess() const
+	void applyProcess(RenderAccessor accessor) const
 	{
-		return m_process;
+		m_process(accessor(m_id1), accessor(m_id2));
 	}
 
-	const uint32_t getID1() const
-	{
-		return m_id1;
-	}
-
-	const uint32_t getID2() const
-	{
-		return m_id2;
-	}
+	virtual void process(sf::RenderTexture& texture1, sf::RenderTexture& texture2) 
+	{}
 
 private:
 	uint32_t m_id1;
@@ -42,23 +35,32 @@ private:
 class PipeLine
 {
 public:
-	PipeLine();
+	PipeLine() = default;
+
+	PipeLine(const RenderAccessor& accessor) :
+		m_accessor(accessor)
+	{}
+
+	void setAccessor(RenderAccessor accessor)
+	{
+		m_accessor = accessor;
+	}
+
+	void addStage(const RenderStage& stage)
+	{
+		m_stages.push_back(stage);
+	}
 
 	const sf::Sprite execute()
 	{
 		for (const RenderStage& stage : m_stages)
 		{
-			const uint32_t id1(stage.getID1());
-			const uint32_t id2(stage.getID2());
-			const StageProcess& process(stage.getProcess());
-
-
+			stage.process(m_accessor);
 		}
 	}
 
 private:
-	uint32_t m_final_texture_id;
 	RenderAccessor m_accessor;
 	std::vector<RenderStage> m_stages;
-	
 };
+
