@@ -62,6 +62,12 @@ public:
     bloom_texure.display();
     final_render.draw(sf::Sprite(m_blur.apply(bloom_texure.getTexture(), 4)), sf::BlendAdd);
   }
+  
+  using BloomStagePtr = std::shared_ptr<RenderStage>;
+  static BloomStagePtr create(ID tex1, ID tex2, uint32_t width, uint32_t height)
+  {
+    return std::make_shared<BloomStage>(tex1, tex2, width, height);
+  }
 
 private:
   // Blur lib
@@ -76,11 +82,8 @@ using BloomStagePtr = std::shared_ptr<RenderStage>;
 // Create a new layer
 const ID bloom_texture(renderer.addLayer());
 
-// Instantiate a bloom render stage
-BloomStagePtr bloom_stage(std::make_shared<BloomStage>(bloom_texture, Renderer::FinalTexture, win_width, win_height));
-
 // Add the stage to the render pipeline
-renderer.getPipeline().addStage(bloom_stage);
+renderer.getPipeline().addStage(BloomStage::create(bloom_texture, Renderer::FinalTexture, win_width, win_height));
 ```
 
 ### 3. Draw the glowing shape on the appropriate layers
