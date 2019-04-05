@@ -77,8 +77,6 @@ private:
 
 ### 2. Add the stage to the renderer pipeline
 ```cpp
-using BloomStagePtr = std::shared_ptr<RenderStage>;
-
 // Create a new layer
 const ID bloom_texture(renderer.addLayer());
 
