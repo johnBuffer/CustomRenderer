@@ -1,10 +1,17 @@
 #include <SFML/Graphics.hpp>
+#include "Renderer.hpp"
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
+	constexpr uint32_t win_width(1600);
+	constexpr uint32_t win_height(900);
+
+	sf::RenderWindow window(sf::VideoMode(win_width, win_height), "RenderTest");
 	sf::CircleShape shape(100.f);
 	shape.setFillColor(sf::Color::Green);
+
+	Renderer renderer(win_width, win_height);
+	renderer.setRenderScale(0.5f);
 
 	while (window.isOpen())
 	{
@@ -15,8 +22,10 @@ int main()
 				window.close();
 		}
 
+		renderer.draw(shape);
+
 		window.clear();
-		window.draw(shape);
+		window.draw(renderer.render());
 		window.display();
 	}
 
