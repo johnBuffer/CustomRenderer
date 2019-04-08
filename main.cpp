@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "Renderer.hpp"
 #include "dynamic_blur.hpp"
+#include <iostream>
 
 class BloomStage : public RenderStage
 {
@@ -9,13 +10,13 @@ public:
 
 	BloomStage(ID tex1, ID tex2, uint32_t width, uint32_t height) :
 		RenderStage(tex1, tex2),
-		m_blur(width, height, 0.25f)
+		m_blur(width, height, 0.5f)
 	{}
 
 	void process(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render) const override
 	{
 		bloom_texure.display();
-		final_render.draw(m_blur.apply(bloom_texure.getTexture(), 2), sf::BlendAdd);
+		final_render.draw(m_blur.apply(bloom_texure.getTexture(), 4), sf::BlendAdd);
 	}
 
 	static BloomStagePtr create(ID tex1, ID tex2, uint32_t width, uint32_t height)
@@ -48,6 +49,8 @@ int main()
 	shape.setFillColor(sf::Color::Green);
 	shape.setOrigin(r, r);
 
+	float time(0.0f);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -56,6 +59,9 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
+
+		time += 0.0001f;
+		shape.setPosition(800.0f * cos(time), 400.0f * sin(time));
 
 		renderer.clear();
 
