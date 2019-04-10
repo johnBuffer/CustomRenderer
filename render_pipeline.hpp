@@ -50,12 +50,12 @@ public:
 		m_stages.push_back(stage);
 	}
 
-	const sf::Sprite execute()
+	const void execute()
 	{
 		for (const RenderStagePtr stage : m_stages)
 		{
 			stage->exec(m_accessor);
-		}
+		} 
 	}
 
 private:
