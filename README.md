@@ -38,7 +38,7 @@ window.display();
 
 ## Adanced usage with example: _Bloom effect_
 
-### 1. Create a custom render stage inheriting from the _RenderStage_ base class
+### 1. Create a custom render stage extending the _RenderStage_ base class
 
 This class defines what need to be done to apply the bloom effect. 
 
