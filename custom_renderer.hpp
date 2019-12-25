@@ -91,6 +91,11 @@ public:
 		return result;
 	}
 
+	void render_in(sf::RenderTarget& target)
+	{
+		target.draw(render());
+	}
+
 private:
 	float m_zoom;
 	sf::Vector2f m_focus;

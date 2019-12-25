@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include "Renderer.hpp"
+#include "custom_renderer.hpp"
 #include "dynamic_blur.hpp"
 #include <iostream>
 
@@ -67,8 +67,8 @@ int main()
 
 		renderer.draw(shape, bloom_texture);
 		renderer.draw(shape, Renderer::FinalTexture);
+		renderer.render_in(window);
 
-		window.draw(renderer.render());
 		window.display();
 	}
 
