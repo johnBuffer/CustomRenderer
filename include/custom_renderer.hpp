@@ -61,8 +61,7 @@ public:
 
 	void clear()
 	{
-		for (RenderLayer& layer : m_layers)
-		{
+		for (RenderLayer& layer : m_layers) {
 			layer.render_texture.clear();
 		}
 	}
@@ -78,6 +77,20 @@ public:
 		rs.transform.scale(m_render_scale, m_render_scale);
 
 		layer.render_texture.draw(drawable, rs);
+	}
+
+	void draw(const sf::Drawable& drawable, std::vector<ID> layers)
+	{
+		for (ID layer_id : layers) {
+			RenderLayer& layer(m_layers[layer_id]);
+
+			sf::RenderStates rs;
+			rs.transform.translate(-m_focus);
+			rs.transform.translate(0.5f * m_render_size.x * m_render_scale, 0.5f * m_render_size.y * m_render_scale);
+			rs.transform.scale(m_render_scale, m_render_scale);
+
+			layer.render_texture.draw(drawable, rs);
+		}
 	}
 
 	const sf::Sprite render()

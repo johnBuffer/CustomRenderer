@@ -11,7 +11,8 @@ public:
 	BloomStage(ID tex1, ID tex2, uint32_t width, uint32_t height) :
 		RenderStage(tex1, tex2),
 		m_blur(width, height, 0.5f)
-	{}
+	{
+	}
 
 	void process(sf::RenderTexture& bloom_texure, sf::RenderTexture& final_render) const override
 	{
@@ -40,8 +41,8 @@ int main()
 	renderer.setRenderScale(1.0f);
 
 	// Add bloom layer
-	const ID bloom_texture(renderer.addLayer());
-	renderer.getPipeline().addStage(BloomStage::create(bloom_texture, Renderer::FinalTexture, win_width, win_height));
+	const ID bloom_layer(renderer.addLayer());
+	renderer.getPipeline().addStage(BloomStage::create(bloom_layer, Renderer::FinalTexture, win_width, win_height));
 
 	// Draw
 	const float r(100.0f);
@@ -51,22 +52,19 @@ int main()
 
 	float time(0.0f);
 
-	while (window.isOpen())
-	{
+	while (window.isOpen()) {
 		sf::Event event;
-		while (window.pollEvent(event))
-		{
+		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
 
-		time += 0.0001f;
+		time += 0.0002f;
 		shape.setPosition(800.0f * cos(time), 400.0f * sin(time));
 
 		renderer.clear();
 
-		renderer.draw(shape, bloom_texture);
-		renderer.draw(shape, Renderer::FinalTexture);
+		renderer.draw(shape, { Renderer::FinalTexture, bloom_layer });
 		renderer.render_in(window);
 
 		window.display();
