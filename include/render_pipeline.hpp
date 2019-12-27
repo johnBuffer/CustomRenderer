@@ -11,6 +11,8 @@ using RenderAccessor = std::function<sf::RenderTexture&(uint32_t id)>;
 class RenderStage
 {
 public:
+	using Ptr = std::shared_ptr<RenderStage>;
+
 	RenderStage(uint32_t id1, uint32_t id2) :
 		m_id1(id1),
 		m_id2(id2)
@@ -28,7 +30,6 @@ private:
 	uint32_t m_id2;
 };
 
-using RenderStagePtr = std::shared_ptr<RenderStage>;
 
 // An array on stages that will be applied sequentialy
 class PipeLine
@@ -45,21 +46,20 @@ public:
 		m_accessor = accessor;
 	}
 
-	void addStage(const RenderStagePtr stage)
+	void addStage(const RenderStage::Ptr stage)
 	{
 		m_stages.push_back(stage);
 	}
 
 	const void execute()
 	{
-		for (const RenderStagePtr stage : m_stages)
-		{
+		for (const RenderStage::Ptr stage : m_stages) {
 			stage->exec(m_accessor);
 		} 
 	}
 
 private:
 	RenderAccessor m_accessor;
-	std::vector<RenderStagePtr> m_stages;
+	std::vector<RenderStage::Ptr> m_stages;
 };
 

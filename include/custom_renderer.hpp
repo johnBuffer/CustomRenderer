@@ -5,25 +5,10 @@
 #include <memory>
 #include <iostream>
 #include "render_pipeline.hpp"
+#include "layer.hpp"
 
-using ID = uint32_t;
+using LayerID = uint32_t;
 
-struct RenderLayer
-{
-	RenderLayer() :
-		m_render_texture_ptr(std::make_unique<sf::RenderTexture>()),
-		render_texture(*m_render_texture_ptr)
-	{
-		std::cout << "New RenderLayer created" << std::endl;
-	}
-
-private:
-	std::unique_ptr<sf::RenderTexture> m_render_texture_ptr;
-
-public:
-	sf::RenderTexture& render_texture;
-	float render_scale;
-};
 
 class Renderer
 {
@@ -33,10 +18,10 @@ public:
 		FinalTexture = 0
 	};
 
-	Renderer(uint32_t render_width, uint32_t render_height) :
+	Renderer(uint32_t render_width, uint32_t render_height, float render_scale = 1.0f) :
 		m_pipeline([&](uint32_t id) -> sf::RenderTexture& {return m_layers[id].render_texture; }),
 		m_render_size(render_width, render_height),
-		m_render_scale(1.0f)
+		m_render_scale(render_scale)
 	{
 		addLayer();
 	}
@@ -51,22 +36,22 @@ public:
 		m_render_scale = scale;
 	}
 
-	ID addLayer()
+	LayerID addLayer(bool clear = true)
 	{
-		m_layers.emplace_back();
-		m_layers.back().render_texture.create(m_render_size.x, m_render_size.y);
+		LayerInfo info(m_render_size.x, m_render_size.y, clear);
+		m_layers.emplace_back(info);
 
-		return ID(m_layers.size() - 1);
+		return LayerID(m_layers.size() - 1);
 	}
 
 	void clear()
 	{
 		for (RenderLayer& layer : m_layers) {
-			layer.render_texture.clear();
+			layer.clear();
 		}
 	}
 
-	void draw(const sf::Drawable& drawable, ID layer_id = 0)
+	void draw(const sf::Drawable& drawable, LayerID layer_id = 0)
 	{
 		RenderLayer& layer(m_layers[layer_id]);
 
@@ -79,17 +64,10 @@ public:
 		layer.render_texture.draw(drawable, rs);
 	}
 
-	void draw(const sf::Drawable& drawable, std::vector<ID> layers)
+	void draw(const sf::Drawable& drawable, std::vector<LayerID> layers)
 	{
-		for (ID layer_id : layers) {
-			RenderLayer& layer(m_layers[layer_id]);
-
-			sf::RenderStates rs;
-			rs.transform.translate(-m_focus);
-			rs.transform.translate(0.5f * m_render_size.x * m_render_scale, 0.5f * m_render_size.y * m_render_scale);
-			rs.transform.scale(m_render_scale, m_render_scale);
-
-			layer.render_texture.draw(drawable, rs);
+		for (LayerID layer_id : layers) {
+			draw(drawable, layer_id);
 		}
 	}
 

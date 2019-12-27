@@ -8,7 +8,7 @@ class BloomStage : public RenderStage
 public:
 	using BloomStagePtr = std::shared_ptr<RenderStage>;
 
-	BloomStage(ID tex1, ID tex2, uint32_t width, uint32_t height) :
+	BloomStage(LayerID tex1, LayerID tex2, uint32_t width, uint32_t height) :
 		RenderStage(tex1, tex2),
 		m_blur(width, height, 0.5f)
 	{
@@ -20,7 +20,7 @@ public:
 		final_render.draw(m_blur.apply(bloom_texure.getTexture(), 4), sf::BlendAdd);
 	}
 
-	static BloomStagePtr create(ID tex1, ID tex2, uint32_t width, uint32_t height)
+	static BloomStagePtr create(LayerID tex1, LayerID tex2, uint32_t width, uint32_t height)
 	{
 		return std::make_shared<BloomStage>(tex1, tex2, width, height);
 	}
@@ -41,7 +41,7 @@ int main()
 	renderer.setRenderScale(1.0f);
 
 	// Add bloom layer
-	const ID bloom_layer(renderer.addLayer());
+	const LayerID bloom_layer(renderer.addLayer());
 	renderer.getPipeline().addStage(BloomStage::create(bloom_layer, Renderer::FinalTexture, win_width, win_height));
 
 	// Draw
