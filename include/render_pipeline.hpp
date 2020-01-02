@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-using RenderAccessor = std::function<sf::RenderTexture&(uint32_t id)>;
+using RenderAccessor = std::function<sf::RenderTexture&(const std::string&)>;
 
 // A stage in the pipeline
 class RenderStage
@@ -13,7 +13,7 @@ class RenderStage
 public:
 	using Ptr = std::shared_ptr<RenderStage>;
 
-	RenderStage(uint32_t id1, uint32_t id2) :
+	RenderStage(const std::string& id1, const std::string& id2) :
 		m_id1(id1),
 		m_id2(id2)
 	{}
@@ -23,15 +23,17 @@ public:
 		process(accessor(m_id1), accessor(m_id2));
 	}
 
-	virtual void process(sf::RenderTexture&, sf::RenderTexture&) const {};
+	virtual void process(sf::RenderTexture& in, sf::RenderTexture& out) const {
+		out.draw(sf::Sprite(in.getTexture()));
+	};
 
 private:
-	uint32_t m_id1;
-	uint32_t m_id2;
+	const std::string m_id1;
+	const std::string m_id2;
 };
 
 
-// An array on stages that will be applied sequentialy
+// An array of stages that will be executed
 class PipeLine
 {
 public:

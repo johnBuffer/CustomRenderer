@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <map>
 #include <memory>
 #include <iostream>
 #include "render_pipeline.hpp"
@@ -10,20 +11,22 @@
 using LayerID = uint32_t;
 
 
+struct Drawable : sf::Drawable
+{
+	std::vector<std::string> layers;
+};
+
+
+
 class Renderer
 {
 public:
-	enum
-	{
-		FinalTexture = 0
-	};
-
 	Renderer(uint32_t render_width, uint32_t render_height, float render_scale = 1.0f) :
-		m_pipeline([&](uint32_t id) -> sf::RenderTexture& {return m_layers[id].render_texture; }),
+		m_pipeline([&](const std::string& name) -> sf::RenderTexture& {return m_layers[name].getTexture(); }),
 		m_render_size(render_width, render_height),
 		m_render_scale(render_scale)
 	{
-		addLayer();
+		addLayer("final");
 	}
 
 	PipeLine& getPipeline()
@@ -36,47 +39,40 @@ public:
 		m_render_scale = scale;
 	}
 
-	LayerID addLayer(bool clear = true)
+	LayerID addLayer(const std::string& name, bool clear = true)
 	{
 		LayerInfo info(m_render_size.x, m_render_size.y, clear);
-		m_layers.emplace_back(info);
+		m_layers[name] = RenderLayer(info);
 
 		return LayerID(m_layers.size() - 1);
 	}
 
 	void clear()
 	{
-		for (RenderLayer& layer : m_layers) {
-			layer.clear();
+		for (auto& layer : m_layers) {
+			layer.second.clear();
 		}
 	}
 
-	void draw(const sf::Drawable& drawable, LayerID layer_id = 0)
+	void draw(Drawable& drawable)
 	{
-		RenderLayer& layer(m_layers[layer_id]);
-
-		sf::RenderStates rs;
-		rs.transform.translate(-m_focus);
-		rs.transform.translate(0.5f * m_render_size.x * m_render_scale, 0.5f * m_render_size.y * m_render_scale);
-
-		rs.transform.scale(m_render_scale, m_render_scale);
-
-		layer.render_texture.draw(drawable, rs);
+		for (const std::string& name : drawable.layers) {
+			drawInLayer(drawable, name);
+		}
 	}
 
-	void draw(const sf::Drawable& drawable, std::vector<LayerID> layers)
+	void setFocus(const sf::Vector2f& coord)
 	{
-		for (LayerID layer_id : layers) {
-			draw(drawable, layer_id);
-		}
+		m_focus = coord;
 	}
 
 	const sf::Sprite render()
 	{
 		m_pipeline.execute();
+		RenderLayer& final_layer = m_layers["final"];
+		final_layer.getTexture().display();
 
-		m_layers.front().render_texture.display();
-		sf::Sprite result(m_layers.front().render_texture.getTexture());
+		sf::Sprite result(final_layer.getTexture().getTexture());
 		result.setScale(1.0f / m_render_scale, 1.0f / m_render_scale);
 
 		return result;
@@ -85,6 +81,7 @@ public:
 	void render_in(sf::RenderTarget& target)
 	{
 		target.draw(render());
+		clear();
 	}
 
 private:
@@ -95,5 +92,15 @@ private:
 
 	float m_render_scale;
 	sf::Vector2u m_render_size;
-	std::vector<RenderLayer> m_layers;
+	std::map<const std::string, RenderLayer> m_layers;
+
+	void drawInLayer(const sf::Drawable& drawable, const std::string& layer_name)
+	{
+		RenderLayer& layer(m_layers[layer_name]);
+		sf::RenderStates rs;
+		rs.transform.translate(-m_focus);
+		rs.transform.translate(0.5f * m_render_size.x * m_render_scale, 0.5f * m_render_size.y * m_render_scale);
+		rs.transform.scale(m_render_scale, m_render_scale);
+		layer.getTexture().draw(drawable, rs);
+	}
 };

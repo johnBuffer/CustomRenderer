@@ -29,24 +29,27 @@ struct RenderLayer
 	using Ptr = std::shared_ptr<RenderLayer>;
 
 	RenderLayer(const LayerInfo& layer_info)
-		: m_render_texture_ptr(std::make_unique<sf::RenderTexture>())
-		, render_texture(*m_render_texture_ptr)
+		: m_render_texture(std::make_unique<sf::RenderTexture>())
 		, m_info(layer_info)
 	{
-		render_texture.create(m_info.width, m_info.height);
+		m_render_texture->create(m_info.width, m_info.height);
 	}
 
 	void clear() {
 		if (m_info.clear) {
-			render_texture.clear();
+			m_render_texture->clear();
 		}
 	}
 
+	sf::RenderTexture& getTexture()
+	{
+		return *m_render_texture;
+	}
+
 private:
-	std::unique_ptr<sf::RenderTexture> m_render_texture_ptr;
+	std::shared_ptr<sf::RenderTexture> m_render_texture;
 	LayerInfo m_info;
 
 public:
-	sf::RenderTexture& render_texture;
 	float render_scale;
 };
